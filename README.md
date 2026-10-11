@@ -2,6 +2,31 @@
 
 Este es un proyecto React para la página web de Zoom TV Canal 10.
 
+## Base de datos de Zoom TV
+
+El proyecto guarda su contenido en una base **MySQL/MariaDB** llamada **`zoomtv_db`**. La web y el dashboard no se conectan directamente a la base: ambos envían sus consultas a la API de ZoomTV, y la API lee o actualiza las tablas de MySQL.
+
+### Qué información guarda cada tabla
+
+| Tabla | Información almacenada |
+| --- | --- |
+| `noticias` | Titular, contenido, resumen, categoría, imagen, fecha, fuente y estado de publicación. |
+| `programacion` | Nombre del programa, día, hora de inicio y fin, conductor, categoría y estado. |
+| `anunciantes` | Empresa, contacto, teléfono, correo, dirección, horario, web, categoría e imágenes. |
+| `nosotros` | Nombre de Zoom TV, descripción, historia, misión, visión, valores, equipo y datos de contacto. |
+| `live_stream` | Título, URL de transmisión, descripción y estado activo. |
+| `assistant_faq` | Preguntas frecuentes y palabras clave que usa Zoom TV Assistant. |
+| `assistant_social_links` | Plataformas sociales y sus enlaces oficiales. |
+
+### Conexión y configuración
+
+- **Base local:** `zoomtv_db` en MySQL/MariaDB, normalmente en `127.0.0.1:3306`.
+- **API local:** `http://localhost:3000/api`; el frontend usa `VITE_API_URL` para encontrarla.
+- **Credenciales de MySQL:** se configuran solamente en `backend/.env` mediante `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` y `DB_NAME=zoomtv_db`.
+- **Esquema SQL:** se encuentra en `backend/database/schema.sql` dentro del proyecto del backend. El backend también crea las tablas del chatbot si todavía no existen.
+
+No guardes contraseñas en este repositorio ni en variables `VITE_`: esas variables se incluyen en el código que recibe el navegador.
+
 ## 🚀 Características
 
 - **Página de TV moderna** con diseño responsivo
@@ -138,23 +163,3 @@ El proyecto utiliza variables de entorno para configuración:
 ## 📄 Licencia
 
 Este proyecto es propiedad de Zoom TV Canal 10.
-## Base de datos
-
-La web consulta los datos mediante la API; el navegador no se conecta directamente a MySQL. La base utilizada por el backend es **`zoomtv_db`** (MySQL/MariaDB).
-
-Tablas principales:
-
-- `noticias`: noticias, categorías, imágenes y estado de publicación.
-- `programacion`: programas y horarios por día.
-- `anunciantes`: datos comerciales e imágenes de anunciantes.
-- `nosotros`: información institucional, misión, visión, valores e historia.
-- `live_stream`: título y enlace de la transmisión en vivo.
-- `assistant_faq` y `assistant_social_links`: preguntas y enlaces del chatbot; el backend las crea al iniciar el asistente si no existen.
-
-### Configuración local
-
-1. Inicia MySQL/MariaDB y crea o importa la base `zoomtv_db` usando el esquema SQL del backend.
-2. Configura en `backend/.env` las variables `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` y `DB_NAME=zoomtv_db`.
-3. En este frontend, configura `VITE_API_URL=http://localhost:3000/api` en `.env` para desarrollo. En producción, usa la URL pública de la API.
-
-No subas archivos `.env` ni contraseñas al repositorio. La API y las credenciales de MySQL pertenecen al backend.
