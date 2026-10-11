@@ -133,6 +133,48 @@ CREATE TABLE IF NOT EXISTS assistant_social_links (
 
 Las tablas `assistant_faq` y `assistant_social_links` también se crean automáticamente cuando se utiliza el chatbot por primera vez.
 
+## Zoom TV Assistant (chatbot)
+
+El asistente responde mediante reglas de intención y palabras clave, consultando el contenido publicado en MySQL. **No es un modelo de inteligencia artificial entrenado con aprendizaje automático ni genera respuestas libres**: su conocimiento se configura con preguntas frecuentes y se complementa con los datos actuales de las tablas del sitio.
+
+### Cómo está configurado
+
+En `backend/routes/assistant.js` se declaran preguntas semilla (`FAQ_SEEDS`) con una categoría y palabras clave. En la primera consulta al asistente, la API crea `assistant_faq` y `assistant_social_links` si faltan y agrega las preguntas y redes iniciales sin duplicarlas. Después normaliza la pregunta (minúsculas y sin tildes), detecta la intención y consulta los datos correspondientes. Las preguntas y palabras clave activas también se leen desde `assistant_faq`.
+
+La configuración inicial contempla estas preguntas e intenciones:
+
+- **Programación:** «¿Cuál es el horario de programación?» y «¿Qué programas hay hoy?»; puede resolver consultas por día y horario.
+- **Anunciantes:** «¿Qué anunciantes están activos?»; también busca datos de un anunciante concreto, como contacto, horario o web.
+- **Contacto y Nosotros:** «¿Cómo contacto a Zoom TV?» y «¿Qué es Zoom TV?»; utiliza la información, historia, misión, visión, valores y equipo publicados.
+- **Redes sociales:** «¿Cuáles son las redes sociales de Zoom TV?»; entrega todos los enlaces activos o el enlace de una plataforma.
+- **En vivo:** «¿Cómo puedo ver Zoom TV en vivo?»; consulta la transmisión activa y entrega su enlace.
+- **Noticias:** «¿Qué noticias tienen?», «¿Qué categorías de noticias hay?» y consultas por Actualidad, Deportes, Música, Nacionales o Regionales.
+- **Ayuda:** «¿Qué información puede dar Zoom TV Assistant?».
+
+### Datos dinámicos y respuestas con contenido
+
+| Consulta | Fuente consultada | Respuesta del asistente |
+| --- | --- | --- |
+| Horarios o programa de hoy | `programacion` | Filtra programas activos por día y hora. Para saber qué se transmite ahora, considera la hora de Perú (`America/Lima`). |
+| Anunciantes | `anunciantes` | Lista anunciantes activos y muestra los datos disponibles de uno en particular. |
+| Información institucional o contacto | `nosotros` | Usa el registro institucional más reciente. |
+| Transmisión en vivo | `live_stream` | Usa el live activo más reciente; el frontend puede mostrar la acción «Ver Live» hacia `/live`. |
+| Noticias | `noticias` | Busca noticias publicadas por fecha, categoría o relevancia y puede devolver tarjetas con título, resumen, imagen, fuente y enlace a la noticia. |
+| Redes sociales | `assistant_social_links` | Muestra únicamente enlaces activos. |
+
+Cuando la respuesta incluye una noticia, la API entrega los datos de la tarjeta estructurados para que el chat muestre su imagen y enlace. El asistente también admite saludos, agradecimientos, ayuda y seguimiento de algunas preguntas usando el historial reciente enviado por el chat. Si la pregunta no coincide con una intención conocida, ofrece orientación sobre los temas que puede consultar.
+
+### Cómo ampliar el conocimiento
+
+1. Añade o ajusta una entrada en `FAQ_SEEDS` en `backend/routes/assistant.js`, indicando pregunta, categoría y sinónimos en palabras clave. Las categorías deben corresponder a las intenciones que procesa la función de respuesta.
+2. Verifica que la intención consulte la tabla y los campos correctos en la misma ruta. Para información que cambia (noticias, horarios, anunciantes, datos de Nosotros y live), actualiza el contenido desde el dashboard; el asistente lo consulta directamente en la base de datos.
+3. Para redes sociales, modifica las filas de `assistant_social_links`. Para FAQ, se puede consultar el conocimiento activo mediante `GET /api/assistant/knowledge`; las filas activas se usan para detectar preguntas.
+4. Reinicia la API después de cambiar el código. Las preguntas iniciales usan inserción sin duplicados; editar el arreglo de semillas no sobrescribe automáticamente una pregunta que ya exista en la base.
+
+El dashboard no incluye actualmente una pantalla para administrar las FAQ del chatbot. Su mantenimiento se hace en el código o directamente en `assistant_faq`; el resto de contenido dinámico se mantiene en sus secciones habituales del dashboard.
+
+La API del chat recibe `POST /api/assistant/chat` con JSON como `{ "message": "¿Qué programas hay hoy?" }`. La URL completa local es `http://localhost:3000/api/assistant/chat`.
+
 ### Conexión y configuración
 
 - **Base local:** `zoomtv_db` en MySQL/MariaDB, normalmente en `127.0.0.1:3306`.
