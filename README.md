@@ -18,6 +18,121 @@ El proyecto guarda su contenido en una base **MySQL/MariaDB** llamada **`zoomtv_
 | `assistant_faq` | Preguntas frecuentes y palabras clave que usa Zoom TV Assistant. |
 | `assistant_social_links` | Plataformas sociales y sus enlaces oficiales. |
 
+### Esquema SQL de las tablas
+
+Este es el esquema de `zoomtv_db` que utiliza el backend:
+
+```sql
+CREATE DATABASE IF NOT EXISTS zoomtv_db;
+USE zoomtv_db;
+
+CREATE TABLE IF NOT EXISTS nosotros (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    mision TEXT,
+    vision TEXT,
+    valores TEXT,
+    imagen_url VARCHAR(500),
+    nombre_empresa VARCHAR(255),
+    slogan VARCHAR(500),
+    email VARCHAR(100),
+    telefono VARCHAR(20),
+    historia TEXT,
+    equipo TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS noticias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    contenido TEXT NOT NULL,
+    resumen TEXT,
+    categoria VARCHAR(100),
+    autor VARCHAR(100),
+    imagen_url VARCHAR(500),
+    fecha_publicacion DATETIME,
+    destacada BOOLEAN DEFAULT FALSE,
+    activa BOOLEAN DEFAULT TRUE,
+    descripcion TEXT,
+    imagen VARCHAR(500),
+    fecha VARCHAR(50),
+    fuente VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS programacion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_programa VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    horario_inicio TIME NOT NULL,
+    horario_fin TIME NOT NULL,
+    dia_semana ENUM('Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo') NOT NULL,
+    conductor VARCHAR(100),
+    categoria VARCHAR(100),
+    activo BOOLEAN DEFAULT TRUE,
+    hora VARCHAR(20),
+    programa VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS anunciantes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_empresa VARCHAR(255) NOT NULL,
+    contacto VARCHAR(100),
+    telefono VARCHAR(20),
+    email VARCHAR(100),
+    direccion TEXT,
+    descripcion TEXT,
+    logo_url VARCHAR(500),
+    sitio_web VARCHAR(255),
+    activo BOOLEAN DEFAULT TRUE,
+    nombre VARCHAR(255),
+    categoria VARCHAR(100),
+    horario VARCHAR(100),
+    imagen VARCHAR(500),
+    flyer VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS live_stream (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    url_stream VARCHAR(500) NOT NULL,
+    descripcion TEXT,
+    activo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS assistant_faq (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    pregunta VARCHAR(500) NOT NULL,
+    categoria VARCHAR(80) NOT NULL,
+    palabras_clave TEXT,
+    respuesta TEXT,
+    activa BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_assistant_faq_question (pregunta(191))
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS assistant_social_links (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    plataforma VARCHAR(80) NOT NULL UNIQUE,
+    url VARCHAR(1000) NOT NULL,
+    activa BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Las tablas `assistant_faq` y `assistant_social_links` también se crean automáticamente cuando se utiliza el chatbot por primera vez.
+
 ### Conexión y configuración
 
 - **Base local:** `zoomtv_db` en MySQL/MariaDB, normalmente en `127.0.0.1:3306`.
